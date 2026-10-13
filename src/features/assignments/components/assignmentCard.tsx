@@ -5,18 +5,14 @@ import { useDeadline } from '../hooks/useDeadline';
 import { useAppDispatch } from '../../../app/hooks';
 import { toggleComplete, deleteAssignment } from '../assignmentSlice';
 
-// 1. Khởi tạo Context nội bộ cho riêng Card (theo Slide Buổi 2)
 const AssignmentCardContext = createContext<Assignment | null>(null);
 
 function useCardContext() {
   const context = useContext(AssignmentCardContext);
-  if (!context) {
-    throw new Error('Các component con phải nằm trong <AssignmentCard>');
-  }
+  if (!context) throw new Error('Compound Component Error');
   return context;
 }
 
-// 2. Component Cha (Provider)
 interface AssignmentCardProps {
   assignment: Assignment;
   children: ReactNode;
@@ -28,11 +24,11 @@ export function AssignmentCard({ assignment, children }: AssignmentCardProps) {
       <div
         style={{
           border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '16px',
+          borderRadius: '10px',
+          padding: '16px 20px',
           marginBottom: '12px',
           backgroundColor: assignment.isCompleted ? '#f8fafc' : '#ffffff',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          transition: 'border-color 0.15s ease',
         }}
       >
         {children}
@@ -41,86 +37,96 @@ export function AssignmentCard({ assignment, children }: AssignmentCardProps) {
   );
 }
 
-// 3. Component Con: Header (Môn học + Badge ưu tiên)
 function Header() {
   const { subject, priority } = useCardContext();
 
-  const priorityColors = {
-    HIGH: { bg: '#fee2e2', text: '#dc2626' },
-    MEDIUM: { bg: '#fef3c7', text: '#d97706' },
-    LOW: { bg: '#dcfce7', text: '#16a34a' },
+  const badgeConfig = {
+    HIGH: { bg: '#fee2e2', text: '#ff1717', label: 'Cao' },
+    MEDIUM: { bg: '#fef3c7', text: '#b3550c', label: 'Trung bình' },
+    LOW: { bg: '#f1f5f9', text: '#5c6941', label: 'Thấp' },
   };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-      <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#64748b' }}>
-        📚 {subject}
+      <span style={{ fontWeight: 600, fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        {subject}
       </span>
       <span
         style={{
-          backgroundColor: priorityColors[priority].bg,
-          color: priorityColors[priority].text,
+          backgroundColor: badgeConfig[priority].bg,
+          color: badgeConfig[priority].text,
           padding: '2px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
+          borderRadius: '4px',
+          fontSize: '11px',
           fontWeight: 600,
         }}
       >
-        {priority}
+        {badgeConfig[priority].label}
       </span>
     </div>
   );
 }
 
-// 4. Component Con: Body (Tên bài tập + Thời gian từ Custom Hook useDeadline)
 function Body() {
   const { title, dueDate, isCompleted } = useCardContext();
   const { displayText, isOverdue } = useDeadline(dueDate);
 
+  const getStatusColor = () => {
+    if (isCompleted) return '#00da50';
+    if (isOverdue) return '#dc2626';
+    return '#2563eb';
+  };
+
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div style={{ marginBottom: '14px'  }}>
       <h3
         style={{
           margin: '0 0 6px 0',
           fontSize: '16px',
-          textDecoration: isCompleted ? 'line-through' : 'none',
+          fontWeight: 600,
           color: isCompleted ? '#94a3b8' : '#0f172a',
+          textDecoration: isCompleted ? 'line-through' : 'none',
         }}
       >
         {title}
       </h3>
-      <p style={{ margin: 0, fontSize: '13px', color: isOverdue && !isCompleted ? '#ef4444' : '#64748b' }}>
-        📅 Hạn nộp: {dueDate} • <strong>{isCompleted ? '✅ Đã hoàn thành' : displayText}</strong>
-      </p>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '13px', color: '#64748b' }}>
+        <span>Hạn: {dueDate}</span>
+        <span>•</span>
+        <span style={{ fontWeight: 500, color: getStatusColor() }}>
+          {isCompleted ? 'Đã hoàn thành' : displayText}
+        </span>
+      </div>
     </div>
   );
 }
 
-// 5. Component Con: Footer (Hành động Checkbox + Xoá)
 function Footer() {
   const { id, isCompleted } = useCardContext();
   const dispatch = useAppDispatch();
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
-      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#334155', userSelect: 'none' }}>
         <input
           type="checkbox"
           checked={isCompleted}
           onChange={() => dispatch(toggleComplete(id))}
+          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }}
         />
-        {isCompleted ? 'Hoàn thành' : 'Chưa xong'}
+        {isCompleted ? 'Đã xong' : 'Đánh dấu hoàn thành'}
       </label>
       <button
         onClick={() => dispatch(deleteAssignment(id))}
         style={{
-          backgroundColor: '#ef4444',
-          color: '#ffffff',
+          backgroundColor: 'transparent',
+          color: '#dc2626',
           border: 'none',
           padding: '4px 8px',
           borderRadius: '4px',
           cursor: 'pointer',
           fontSize: '12px',
+          fontWeight: 500,
         }}
       >
         Xoá
@@ -129,7 +135,6 @@ function Footer() {
   );
 }
 
-// 6. Gán các component con vào Cha (Đúng chuẩn Compound Component của Buổi 2)
 AssignmentCard.Header = Header;
 AssignmentCard.Body = Body;
 AssignmentCard.Footer = Footer;

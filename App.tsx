@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from './src/app/hooks';
 import { getAssignments } from './src/features/assignments/assignmentSlice';
 import { AssignmentForm } from './src/features/assignments/components/assignmentForm';
@@ -9,67 +9,90 @@ import { isOverdueAssignment } from './src/features/assignments/types';
 export default function App() {
   const dispatch = useAppDispatch();
   const { items, status, error, filter } = useAppSelector((state) => state.assignments);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1. Khi mở app, gọi API giả lập lấy dữ liệu mẫu ban đầu (Yêu cầu 7)
   useEffect(() => {
     dispatch(getAssignments());
   }, [dispatch]);
 
-  // 2. Lọc danh sách bài tập theo trạng thái được chọn (Yêu cầu 5)
-  // Vận dụng Custom Type Guard isOverdueAssignment (Buổi 1)
   const filteredAssignments = useMemo(() => {
     return items.filter((item) => {
       if (filter === 'COMPLETED') return item.isCompleted;
       if (filter === 'PENDING') return !item.isCompleted && !isOverdueAssignment(item);
       if (filter === 'OVERDUE') return isOverdueAssignment(item);
-      return true; // filter === 'ALL'
+      return true;
     });
   }, [items, filter]);
 
   return (
-    <div style={{ maxWidth: '650px', margin: '40px auto', padding: '0 16px', fontFamily: 'Segoe UI, sans-serif' }}>
-      <header style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <h1 style={{ margin: '0 0 8px 0', color: '#1e293b' }}>🎓 Student Deadline Tracker</h1>
-        <p style={{ margin: 0, color: '#64748b' }}>Quản lý bài tập cá nhân & theo dõi deadline</p>
-      </header>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '80px 32px', boxSizing: 'border-box' }}>
+      <div style={{ maxWidth: '100%', margin: '0 auto' }}>
+        
+        {/* Header Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+          <div>
+            <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>
+              Student Deadline Tracker
+            </h1>
+            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+              Theo dõi và quản lý hạn nộp bài tập cá nhân
+            </p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            style={{
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '9px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            + Thêm bài tập
+          </button>
+        </div>
 
-      {/* Form thêm bài tập mới (Yêu cầu 2) */}
-      <AssignmentForm />
+        {/* Bộ lọc trạng thái */}
+        <AssignmentFilter />
 
-      {/* Thanh bộ lọc trạng thái (Yêu cầu 5) */}
-      <AssignmentFilter />
+        {/* Modal Popup */}
+        <AssignmentForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-      {/* Khu vực hiển thị danh sách bài tập */}
-      <div>
-        {/* Xử lý trạng thái Loading (pending của createAsyncThunk) */}
-        {status === 'loading' && (
-          <p style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>
-            ⏳ Đang tải danh sách bài tập từ hệ thống...
-          </p>
-        )}
+        {/* Danh sách */}
+        <div>
+          {status === 'loading' && (
+            <p style={{ textAlign: 'center', color: '#64748b', padding: '30px', fontSize: '28px' }}>
+              Đang tải dữ liệu từ hệ thống...
+            </p>
+          )}
 
-        {/* Xử lý trạng thái Lỗi */}
-        {status === 'failed' && (
-          <p style={{ textAlign: 'center', color: '#ef4444', padding: '20px' }}>
-            ❌ Đã xảy ra lỗi: {error}
-          </p>
-        )}
+          {status === 'failed' && (
+            <p style={{ textAlign: 'center', color: '#dc2626', padding: '30px', fontSize: '28px' }}>
+              Không thể tải dữ liệu: {error}
+            </p>
+          )}
 
-        {/* Hiển thị danh sách khi tải thành công */}
-        {status === 'succeeded' && filteredAssignments.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#94a3b8', padding: '30px', border: '1px dashed #cbd5e1', borderRadius: '8px' }}>
-            Không có bài tập nào thuộc mục này.
-          </p>
-        )}
+          {status === 'succeeded' && filteredAssignments.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '28px' }}>
+                Không có bài tập nào trong mục này.
+              </p>
+            </div>
+          )}
 
-        {/* Render danh sách bằng Compound Component (Buổi 2) */}
-        {filteredAssignments.map((assignment) => (
-          <AssignmentCard key={assignment.id} assignment={assignment}>
-            <AssignmentCard.Header />
-            <AssignmentCard.Body />
-            <AssignmentCard.Footer />
-          </AssignmentCard>
-        ))}
+          {filteredAssignments.map((assignment) => (
+            <AssignmentCard key={assignment.id} assignment={assignment}>
+              <AssignmentCard.Header />
+              <AssignmentCard.Body />
+              <AssignmentCard.Footer />
+            </AssignmentCard>
+          ))}
+        </div>
+
       </div>
     </div>
   );

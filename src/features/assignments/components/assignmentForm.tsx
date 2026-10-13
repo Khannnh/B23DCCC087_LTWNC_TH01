@@ -4,10 +4,14 @@ import { useAppDispatch } from '../../../app/hooks';
 import { addAssignment } from '../assignmentSlice';
 import { Priority, CreateAssignmentDto } from '../types';
 
-export function AssignmentForm() {
+interface AssignmentFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function AssignmentForm({ isOpen, onClose }: AssignmentFormProps) {
   const dispatch = useAppDispatch();
 
-  // Local state quản lý dữ liệu form nhập liệu
   const [formData, setFormData] = useState<CreateAssignmentDto>({
     subject: '',
     title: '',
@@ -17,19 +21,17 @@ export function AssignmentForm() {
 
   const [error, setError] = useState<string>('');
 
+  if (!isOpen) return null;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate đơn giản
     if (!formData.subject.trim() || !formData.title.trim() || !formData.dueDate) {
-      setError('Vui lòng nhập đầy đủ thông tin môn học, tên bài và hạn nộp!');
+      setError('Vui lòng điền đầy đủ các trường thông tin');
       return;
     }
 
-    // Dispatch action lên Redux Store
     dispatch(addAssignment(formData));
-
-    // Reset form sau khi thêm thành công
     setFormData({
       subject: '',
       title: '',
@@ -37,74 +39,194 @@ export function AssignmentForm() {
       priority: 'MEDIUM',
     });
     setError('');
+    onClose(); // Đóng modal sau khi thêm
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
+    <div
       style={{
-        backgroundColor: '#ffffff',
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.45)',
+        backdropFilter: 'blur(3px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
         padding: '16px',
-        borderRadius: '8px',
-        border: '1px solid #e2e8f0',
-        marginBottom: '20px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
       }}
+      onClick={onClose}
     >
-      <h3 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>➕ Thêm bài tập mới</h3>
-
-      {error && <p style={{ color: '#ef4444', fontSize: '13px', margin: '0 0 8px 0' }}>{error}</p>}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-        <input
-          type="text"
-          placeholder="Tên môn học (vd: LTWNC)"
-          value={formData.subject}
-          onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-          style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-        />
-        <input
-          type="text"
-          placeholder="Tên bài tập (vd: Bài thực hành 01)"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-        />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-        <input
-          type="date"
-          value={formData.dueDate}
-          onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-          style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-        />
-        <select
-          value={formData.priority}
-          onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
-          style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-        >
-          <option value="LOW">Ưu tiên: Thấp (LOW)</option>
-          <option value="MEDIUM">Ưu tiên: Trung bình (MEDIUM)</option>
-          <option value="HIGH">Ưu tiên: Cao (HIGH)</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
+      <div
         style={{
-          backgroundColor: '#2563eb',
-          color: '#ffffff',
-          border: 'none',
-          padding: '8px 16px',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: 600,
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
           width: '100%',
+          maxWidth: '480px',
+          padding: '24px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        Lưu bài tập
-      </button>
-    </form>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#0f172a' }}>
+            Thêm bài tập mới
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+              color: '#64748b',
+              lineHeight: 1,
+            }}
+          >
+            &times;
+          </button>
+        </div>
+
+        {error && (
+          <div
+            style={{
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              fontSize: '13px',
+              marginBottom: '16px',
+              border: '1px solid #fee2e2',
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+              Môn học
+            </label>
+            <input
+              type="text"
+              placeholder="VD: Lập trình web nâng cao"
+              value={formData.subject}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                fontSize: '14px',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+              Tên bài tập
+            </label>
+            <input
+              type="text"
+              placeholder="VD: Bài thực hành 01"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                fontSize: '14px',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+                Hạn nộp
+              </label>
+              <input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#334155', marginBottom: '6px' }}>
+                Độ ưu tiên
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <option value="LOW">Thấp (Low)</option>
+                <option value="MEDIUM">Trung bình (Medium)</option>
+                <option value="HIGH">Cao (High)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#475569',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 500,
+              }}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              style={{
+                padding: '8px 18px',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 500,
+              }}
+            >
+              Thêm bài tập
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
