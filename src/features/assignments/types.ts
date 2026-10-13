@@ -15,14 +15,7 @@ export interface Assignment {
 // 3. Utility Types 
 export type CreateAssignmentDto = Omit<Assignment, 'id' | 'isCompleted'>;
 
-// 4. Generic wrapper cho API Response 
-export interface ApiResponse<T> {
-  statusCode: number;
-  message: string;
-  data: T;
-}
-
-// 5. Custom Type Guard chuẩn TypeScript 
+// 4. Custom Type Guard chuẩn TypeScript 
 export type OverdueAssignment = Assignment & { isCompleted: false };
 
 export function isOverdueAssignment(item: Assignment): item is OverdueAssignment {
