@@ -31,10 +31,10 @@ export default function App() {
         {/* Header Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
-            <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>
+            <h1 style={{ margin: '0 0 4px 0', fontSize: '48px', fontWeight: 700, color: '#0f172a' }}>
               Student Deadline Tracker
             </h1>
-            <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+            <p style={{ margin: 0, fontSize: '28px', color: '#64748b' }}>
               Theo dõi và quản lý hạn nộp bài tập cá nhân
             </p>
           </div>

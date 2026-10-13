@@ -1,4 +1,3 @@
-// src/features/assignments/components/assignmentCard.tsx
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Assignment } from '../types';
 import { useDeadline } from '../hooks/useDeadline';
@@ -24,11 +23,11 @@ export function AssignmentCard({ assignment, children }: AssignmentCardProps) {
       <div
         style={{
           border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '16px 20px',
-          marginBottom: '12px',
+          borderRadius: '12px',
+          padding: '20px 24px',
+          marginBottom: '16px',
           backgroundColor: assignment.isCompleted ? '#f8fafc' : '#ffffff',
-          transition: 'border-color 0.15s ease',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
         }}
       >
         {children}
@@ -41,23 +40,23 @@ function Header() {
   const { subject, priority } = useCardContext();
 
   const badgeConfig = {
-    HIGH: { bg: '#fee2e2', text: '#ff1717', label: 'Cao' },
-    MEDIUM: { bg: '#fef3c7', text: '#b3550c', label: 'Trung bình' },
-    LOW: { bg: '#f1f5f9', text: '#5c6941', label: 'Thấp' },
+    HIGH: { bg: '#fee2e2', text: '#b91c1c', label: 'Cao' },
+    MEDIUM: { bg: '#fef3c7', text: '#b45309', label: 'Trung bình' },
+    LOW: { bg: '#f1f5f9', text: '#475569', label: 'Thấp' },
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-      <span style={{ fontWeight: 600, fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+      <span style={{ fontWeight: 700, fontSize: '14px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
         {subject}
       </span>
       <span
         style={{
           backgroundColor: badgeConfig[priority].bg,
           color: badgeConfig[priority].text,
-          padding: '2px 8px',
-          borderRadius: '4px',
-          fontSize: '11px',
+          padding: '4px 12px',
+          borderRadius: '6px',
+          fontSize: '13px',
           fontWeight: 600,
         }}
       >
@@ -72,28 +71,29 @@ function Body() {
   const { displayText, isOverdue } = useDeadline(dueDate);
 
   const getStatusColor = () => {
-    if (isCompleted) return '#00da50';
+    if (isCompleted) return '#16a34a';
     if (isOverdue) return '#dc2626';
     return '#2563eb';
   };
 
   return (
-    <div style={{ marginBottom: '14px'  }}>
+    <div style={{ marginBottom: '16px' }}>
       <h3
         style={{
-          margin: '0 0 6px 0',
-          fontSize: '16px',
+          margin: '0 0 8px 0',
+          fontSize: '19px',
           fontWeight: 600,
           color: isCompleted ? '#94a3b8' : '#0f172a',
           textDecoration: isCompleted ? 'line-through' : 'none',
+          lineHeight: 1.4,
         }}
       >
         {title}
       </h3>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '13px', color: '#64748b' }}>
-        <span>Hạn: {dueDate}</span>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '15px', color: '#64748b' }}>
+        <span>Hạn nộp: {dueDate}</span>
         <span>•</span>
-        <span style={{ fontWeight: 500, color: getStatusColor() }}>
+        <span style={{ fontWeight: 600, color: getStatusColor() }}>
           {isCompleted ? 'Đã hoàn thành' : displayText}
         </span>
       </div>
@@ -106,13 +106,13 @@ function Footer() {
   const dispatch = useAppDispatch();
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
-      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#334155', userSelect: 'none' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '15px', fontWeight: 500, color: '#334155', userSelect: 'none' }}>
         <input
           type="checkbox"
           checked={isCompleted}
           onChange={() => dispatch(toggleComplete(id))}
-          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }}
+          style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#2563eb' }}
         />
         {isCompleted ? 'Đã xong' : 'Đánh dấu hoàn thành'}
       </label>
@@ -122,11 +122,11 @@ function Footer() {
           backgroundColor: 'transparent',
           color: '#dc2626',
           border: 'none',
-          padding: '4px 8px',
-          borderRadius: '4px',
+          padding: '6px 12px',
+          borderRadius: '6px',
           cursor: 'pointer',
-          fontSize: '12px',
-          fontWeight: 500,
+          fontSize: '14px',
+          fontWeight: 600,
         }}
       >
         Xoá
