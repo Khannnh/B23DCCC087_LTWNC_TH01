@@ -1,3 +1,4 @@
+// src/features/assignments/components/assignmentCard.tsx
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Assignment } from '../types';
 import { useDeadline } from '../hooks/useDeadline';
@@ -18,16 +19,36 @@ interface AssignmentCardProps {
 }
 
 export function AssignmentCard({ assignment, children }: AssignmentCardProps) {
+  const { diffDays, isOverdue } = useDeadline(assignment.dueDate);
+
+  // 1. Xác định màu viền bên trái và nền thẻ theo mức độ khẩn cấp
+  let borderLeftColor = '#94a3b8'; // Mặc định: xám
+  let cardBg = '#ffffff';
+
+  if (assignment.isCompleted) {
+    borderLeftColor = '#0a9265'; // Xanh lá: Đã xong
+    cardBg = '#f6f6f6';
+  } else if (isOverdue) {
+    borderLeftColor = '#ef4444'; // Đỏ tươi: Quá hạn
+    cardBg = '#fffafa';          // Nền phớt hồng để đập ngay vào mắt
+  } else if (diffDays <= 3) {
+    borderLeftColor = '#0a428b'; 
+  }
+
   return (
     <AssignmentCardContext.Provider value={assignment}>
       <div
         style={{
           border: '1px solid #e2e8f0',
+          borderLeft: `12px solid ${borderLeftColor}`, // Dải màu viền nhấn mạnh bên trái
           borderRadius: '12px',
           padding: '20px 24px',
           marginBottom: '16px',
-          backgroundColor: assignment.isCompleted ? '#f8fafc' : '#ffffff',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+          backgroundColor: cardBg,
+          boxShadow: isOverdue && !assignment.isCompleted 
+            ? '0 4px 12px rgba(239, 68, 68, 0.12)' 
+            : '0 2px 4px rgba(0,0,0,0.03)',
+          transition: 'all 0.2s ease',
         }}
       >
         {children}
@@ -68,19 +89,43 @@ function Header() {
 
 function Body() {
   const { title, dueDate, isCompleted } = useCardContext();
-  const { displayText, isOverdue } = useDeadline(dueDate);
+  const { displayText, diffDays, isOverdue } = useDeadline(dueDate);
 
-  const getStatusColor = () => {
-    if (isCompleted) return '#16a34a';
-    if (isOverdue) return '#dc2626';
-    return '#2563eb';
+  // 2. Thiết lập tag cảnh báo nổi bật cho thời hạn
+  const renderDeadlineBadge = () => {
+    if (isCompleted) {
+      return (
+        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '3px 10px', borderRadius: '6px', fontWeight: 600 }}>
+          Đã hoàn thành
+        </span>
+      );
+    }
+    if (isOverdue) {
+      return (
+        <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '3px 10px', borderRadius: '6px', fontWeight: 700 }}>
+          {displayText}
+        </span>
+      );
+    }
+    if (diffDays <= 3) {
+      return (
+        <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '3px 10px', borderRadius: '6px', fontWeight: 700 }}>
+          Sắp tới hạn • {displayText}
+        </span>
+      );
+    }
+    return (
+      <span style={{ backgroundColor: '#f1f5f9', color: '#334155', padding: '3px 10px', borderRadius: '6px', fontWeight: 600 }}>
+        {displayText}
+      </span>
+    );
   };
 
   return (
     <div style={{ marginBottom: '16px' }}>
       <h3
         style={{
-          margin: '0 0 8px 0',
+          margin: '0 0 10px 0',
           fontSize: '19px',
           fontWeight: 600,
           color: isCompleted ? '#94a3b8' : '#0f172a',
@@ -90,12 +135,10 @@ function Body() {
       >
         {title}
       </h3>
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '15px', color: '#64748b' }}>
-        <span>Hạn nộp: {dueDate}</span>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '14px', flexWrap: 'wrap' }}>
+        <span style={{ color: '#64748b' }}>Hạn nộp: {dueDate}</span>
         <span>•</span>
-        <span style={{ fontWeight: 600, color: getStatusColor() }}>
-          {isCompleted ? 'Đã hoàn thành' : displayText}
-        </span>
+        {renderDeadlineBadge()}
       </div>
     </div>
   );
