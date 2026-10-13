@@ -1,5 +1,3 @@
-// src/types/assignment.ts
-
 // 1. Độ ưu tiên & Trạng thái lọc
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type FilterStatus = 'ALL' | 'PENDING' | 'OVERDUE' | 'COMPLETED';
@@ -9,24 +7,26 @@ export interface Assignment {
   id: string;
   subject: string;      // Môn học (vd: "Lập trình web nâng cao")
   title: string;        // Tên bài tập (vd: "Bài thực hành 01")
-  dueDate: string;      // Hạn nộp dạng chuẩn ISO hoặc YYYY-MM-DD
+  dueDate: string;      // Chuẩn YYYY-MM-DD (khớp thẻ input type="date")
   priority: Priority;   // Mức độ ưu tiên
   isCompleted: boolean; // Trạng thái hoàn thành
 }
 
-// 3. Utility Types (Vận dụng Buổi 1)
-// Khi thêm bài tập mới qua form, ta không cần 'id' và 'isCompleted' ban đầu
+// 3. Utility Types 
 export type CreateAssignmentDto = Omit<Assignment, 'id' | 'isCompleted'>;
 
-// 4. Generic wrapper cho API Response (Chuẩn bài học Buổi 1)
+// 4. Generic wrapper cho API Response 
 export interface ApiResponse<T> {
   statusCode: number;
   message: string;
   data: T;
 }
 
-// 5. Custom Type Guard (Buổi 1)
-export function isOverdueAssignment(item: Assignment): boolean {
+// 5. Custom Type Guard chuẩn TypeScript 
+export type OverdueAssignment = Assignment & { isCompleted: false };
+
+export function isOverdueAssignment(item: Assignment): item is OverdueAssignment {
+  // type guard : trả về kiểu 'x is T'
   if (item.isCompleted) return false;
   const now = new Date();
   const deadline = new Date(item.dueDate);

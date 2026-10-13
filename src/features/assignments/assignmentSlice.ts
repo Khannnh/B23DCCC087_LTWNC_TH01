@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Assignment, FilterStatus } from '../../types/assignment';
+import { Assignment, FilterStatus } from './types';
 import { fetchMockAssignments } from './assignmentApi';
 
 interface AssignmentState {
   items: Assignment[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed'; // 3 trạng thái cốt lõi
+  status: 'idle' | 'loading' | 'succeeded' | 'failed'; // 3 trạng thái cốt lõi 
+  //idle là trạng thái tĩnh khi chưa mở dữ liệu , phân biệt với loading là mở dữ liệu nhưng chưa xong 
   filter: FilterStatus;
 }
 

@@ -1,4 +1,4 @@
-import { Assignment, ApiResponse } from '../../types/assignment';
+import { Assignment, ApiResponse } from './types';
 
 // 1. Mảng dữ liệu mẫu ban đầu
 const MOCK_ASSIGNMENTS: Assignment[] = [
