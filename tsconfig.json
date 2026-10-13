@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "rootDir": "./", //lỗi dòng 6 nên phải có dòng 5 để còn chỉ định giải thư mục gốc
+    //vì tsconfig sẽ tìm kiếm cả file trong thư mục cha và con Buoi1,2,...
+    "outDir": "./dist",
+    "jsx": "react-jsx", //thêm dòng này nếu có file tsx
+    "experimentalDecorators": true,
+    "strict": true,
+    "strictNullChecks": true,//để check lỗi kiểu type 
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["Buoi*/**/*.ts", "*.ts" , "Buoi*/**/*.tsx", "*.tsx"],//thêm cả tsx 
+  "exclude": ["node_modules", "dist"]
+}
