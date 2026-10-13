@@ -1,107 +1,78 @@
-BÀI THỰC HÀNH 01: STUDENT DEADLINE TRACKER
+# BÀI THỰC HÀNH 01: STUDENT DEADLINE TRACKER
 
-Môn học: Lập trình web nâng cao (LTWNC)
+* **Môn học:** Lập trình web nâng cao (LTWNC)
+* **Sinh viên:** Nguyễn Hồng Khánh
+* **Mã sinh viên:** B23DCCC087
+* **Công nghệ sử dụng:** React (Vite), TypeScript, Redux Toolkit, CSS-in-JS
 
-Mã sinh viên: B23DCCC087
+---
 
-Công nghệ chính: React, TypeScript, Redux Toolkit, Vite
+## 1. Giới thiệu dự án
 
-1. Giới thiệu ứng dụng
+**Student Deadline Tracker** là ứng dụng quản lý bài tập và theo dõi hạn nộp học tập cá nhân dưới dạng Single Page Application (SPA). Dự án vận dụng tổng hợp kiến thức từ 3 buổi học đầu tiên của môn học:
+1. **Buổi 1:** TypeScript nâng cao (Generics, Utility Types, Custom Type Guards).
+2. **Buổi 2:** React Design Patterns (Custom Hook, Compound Component Pattern).
+3. **Buổi 3:** Quản lý trạng thái toàn cục với Redux Toolkit (Feature-based structure, Typed Hooks, Async Thunks).
 
-Student Deadline Tracker là ứng dụng Single Page Application (SPA) hỗ trợ sinh viên quản lý và theo dõi hạn nộp bài tập cá nhân. Ứng dụng tổng hợp kiến thức từ 3 buổi học đầu tiên của môn Lập trình web nâng cao:
+---
 
-Buổi 1: TypeScript nâng cao (Generics, Utility Types, Custom Type Guard).
+## 2. Bảng đối chiếu yêu cầu & chức năng
 
-Buổi 2: Design Pattern React (Custom Hook, Compound Component Pattern).
+### Các chức năng nghiệp vụ (7/7)
+- [x] **Hiển thị danh sách bài tập:** Đầy đủ các trường: môn học, tên bài tập, hạn nộp, độ ưu tiên (`LOW`, `MEDIUM`, `HIGH`) và trạng thái hoàn thành.
+- [x] **Thêm bài tập mới qua Form:** Modal Dialog cho phép nhập tên môn, tên bài, hạn nộp (input date) và chọn độ ưu tiên.
+- [x] **Đánh dấu / Bỏ đánh dấu hoàn thành:** Cập nhật trạng thái tức thì thông qua Redux action `toggleComplete`.
+- [x] **Xoá bài tập:** Cho phép loại bỏ bài tập khỏi danh sách thông qua Redux action `deleteAssignment`.
+- [x] **Lọc theo 4 trạng thái:** Tất cả (`ALL`), Chưa hoàn thành (`PENDING`), Quá hạn (`OVERDUE`), Đã hoàn thành (`COMPLETED`).
+- [x] **Tính toán hạn nộp:** Tự động tính chênh lệch ngày và hiển thị trực quan: `"Còn X ngày"`, `"Hạn chót là hôm nay"`, hoặc `"Quá hạn Y ngày"`.
+- [x] **API giả lập khi khởi động:** Sử dụng `createAsyncThunk` kết hợp `Promise` có độ trễ (delay) để mô phỏng tải dữ liệu ban đầu kèm trạng thái `loading`, `succeeded`, `failed`.
 
-Buổi 3: Redux Toolkit với TypeScript (Feature-based structure, Typed Hooks, Async Thunk).
+---
 
-2. Danh sách chức năng nghiệp vụ
+## 3. Chi tiết vận dụng kỹ thuật môn học
 
-Ứng dụng đáp ứng đầy đủ 7 yêu cầu chức năng nghiệp vụ theo đề bài:
+### Buổi 1 — TypeScript nâng cao
+* **Generic Wrapper:** Interface `ApiResponse<T>` chuẩn hóa cấu trúc phản hồi từ API giả lập.
+* **Utility Types:** Sử dụng `Omit<Assignment, 'id' | 'isCompleted'>` để tạo kiểu `CreateAssignmentDto`, loại bỏ các trường tự sinh khi người dùng nhập form.
+* **Custom Type Guard:** Hàm `isOverdueAssignment(item: Assignment): item is OverdueAssignment` sử dụng từ khóa `is` để thu hẹp kiểu dữ liệu (Type Narrowing) khi lọc các bài tập quá hạn.
 
-Hiển thị danh sách bài tập: Hiển thị chi tiết môn học, tên bài tập, hạn nộp, mức độ ưu tiên (Cao, Trung bình, Thấp) và trạng thái hoàn thành.
+### Buổi 2 — React Design Patterns
+* **Custom Hook:** Hook `useDeadline(dueDate: string)` đóng gói toàn bộ logic tính toán chênh lệch thời gian, cờ `isOverdue` và chuỗi văn bản thông báo.
+* **Compound Component Pattern:** Component `AssignmentCard` kết hợp React Context nội bộ để chia sẻ dữ liệu cho các sub-components mà không cần truyền props lòng vòng:
+  * `<AssignmentCard>` (Context Provider)
+  * `<AssignmentCard.Header />` (Tên môn học + Badge độ ưu tiên)
+  * `<AssignmentCard.Body />` (Tên bài tập + Thời gian đếm ngược)
+  * `<AssignmentCard.Footer />` (Checkbox hoàn thành + Nút Xóa)
 
-Thêm bài tập mới qua form modal: Cho phép nhập môn học, tên bài, hạn nộp (YYYY-MM-DD) và chọn độ ưu tiên. Form được thiết kế dạng popup modal tiện lợi.
+### Buổi 3 — Redux Toolkit & Feature-based Colocation
+* **Feature-based Directory:** Toàn bộ component, hook, slice, api và type liên quan đến bài tập được gom gọn trong thư mục `src/features/assignments/`.
+* **Typed Hooks:** Xuất `useAppDispatch` và `useAppSelector` từ `src/app/hooks.ts` giúp bảo toàn kiểu dữ liệu tự động cho toàn bộ ứng dụng.
+* **Async Logic:** `createAsyncThunk` (`getAssignments`) quản lý vòng đời bất đồng bộ thông qua `extraReducers` với 3 trạng thái: `pending`, `fulfilled`, và `rejected`.
 
-Đánh dấu / bỏ đánh dấu hoàn thành: Tích chọn checkbox để cập nhật trạng thái đã xong/chưa xong, tự động gạch ngang tiêu đề bài tập.
+---
 
-Xóa bài tập: Nút xóa loại bỏ bài tập khỏi danh sách ngay lập tức.
+## 4. Cấu trúc thư mục
 
-Bộ lọc trạng thái: Lọc theo 4 tiêu chí: Tất cả, Chưa hoàn thành, Quá hạn, Đã hoàn thành.
-
-Tính toán thời hạn: Tự động tính toán và hiển thị thông báo trực quan: "Còn X ngày", "Quá hạn Y ngày", hoặc "Hạn chót là hôm nay".
-
-Khởi tạo dữ liệu từ Mock API: Khi mở ứng dụng, createAsyncThunk tự động gọi hàm giả lập API với độ trễ mạng để nạp dữ liệu mẫu ban đầu.
-
-3. Kiến thức kỹ thuật đã vận dụng
-
-Buổi 1 — TypeScript nâng cao
-
-Generic Type: ApiResponse<T> chuẩn hóa cấu trúc dữ liệu trả về từ API (src/features/assignments/types.ts và src/types/api.ts).
-
-Utility Types: Sử dụng Omit<Assignment, 'id' | 'isCompleted'> để tạo type CreateAssignmentDto phục vụ cho form thêm mới.
-
-Custom Type Guard: Hàm isOverdueAssignment(item: Assignment): item is OverdueAssignment kiểm tra và thu hẹp kiểu cho các bài tập quá hạn.
-
-Buổi 2 — React Design Pattern
-
-Custom Hook nâng cao (useDeadline): Nhận vào chuỗi ngày, sử dụng useMemo để tính số ngày chênh lệch, cờ quá hạn isOverdue và chuỗi văn bản cảnh báo.
-
-Compound Component Pattern (AssignmentCard): Đóng gói thẻ bài tập thành một tập hợp component có khả năng tự chia sẻ dữ liệu qua React Context nội bộ:
-
-<AssignmentCard>: Component cha bọc Provider.
-
-<AssignmentCard.Header>: Hiển thị tên môn học và nhãn ưu tiên.
-
-<AssignmentCard.Body>: Hiển thị tiêu đề bài tập và thời hạn từ useDeadline.
-
-<AssignmentCard.Footer>: Checkbox hoàn thành và nút xóa.
-
-Buổi 3 — Redux Toolkit với TypeScript
-
-Cấu trúc Feature-based: Toàn bộ thành phần của tính năng bài tập được gom gọn trong src/features/assignments/ (types, slice, api, components, hooks).
-
-Typed Hooks: Xuất và sử dụng useAppDispatch cùng useAppSelector đã gán sẵn kiểu RootState và AppDispatch (src/app/hooks.ts).
-
-createAsyncThunk: Thunk getAssignments xử lý 3 trạng thái trong vòng đời gọi dữ liệu (pending, fulfilled, rejected), cập nhật state tương ứng với loading, succeeded, failed.
-
-4. Cấu trúc thư mục
-
+```text
 ├── index.html
 ├── package.json
 ├── tsconfig.json
-├── App.tsx                     # Component chính ráp nối toàn bộ ứng dụng
-├── main.tsx                    # Entry point bọc Redux Provider
+├── App.tsx
+├── main.tsx
 └── src/
     ├── app/
-    │   ├── store.ts            # Cấu hình Redux store
-    │   └── hooks.ts            # Typed hooks (useAppDispatch, useAppSelector)
+    │   ├── store.ts            # Cấu hình Redux Store toàn cục
+    │   └── hooks.ts            # Typed useAppDispatch và useAppSelector
     ├── features/
     │   └── assignments/
-    │       ├── types.ts        # Interface, Type Guard, Utility Types
-    │       ├── assignmentApi.ts# Mock API Promise
-    │       ├── assignmentSlice.ts # Slice quản lý state, reducers, async thunk
-    │       ├── components/
-    │       │   ├── assignmentCard.tsx   # Compound Component hiển thị thẻ
-    │       │   ├── assignmentFilter.tsx # Thanh nút lọc trạng thái
-    │       │   └── assignmentForm.tsx   # Form modal thêm bài tập
-    │       └── hooks/
-    │           └── useDeadline.ts       # Custom hook tính deadline
+    │       ├── types.ts        # Interfaces, DTO, Type Guard
+    │       ├── assignmentApi.ts# Mock API service với Promise trễ
+    │       ├── assignmentSlice.ts # Redux Slice & Async Thunk
+    │       ├── hooks/
+    │       │   └── useDeadline.ts  # Custom hook tính hạn nộp
+    │       └── components/
+    │           ├── assignmentCard.tsx   # Compound Component
+    │           ├── assignmentFilter.tsx # Bộ lọc trạng thái
+    │           └── assignmentForm.tsx   # Modal Form thêm bài tập
     └── types/
-        └── api.ts              # Generic type ApiResponse<T>
-
-
-5. Hướng dẫn cài đặt và chạy ứng dụng
-
-Cài đặt các gói phụ thuộc:
-
-npm install
-
-
-Chạy ứng dụng ở chế độ phát triển (Development):
-
-npm run dev
-
-
-Mở trình duyệt: Truy cập vào đường dẫn local (mặc định: http://localhost:5173/).
+        └── api.ts              # Generic ApiResponse<T> dùng chung
