@@ -54,7 +54,7 @@ const MOCK_ASSIGNMENTS: Assignment[] = [
 
 ];
 
-// 2. Hàm giả lập chờ 5s rồi mới nhả dữ liệu
+// 2. Hàm giả lập chờ 3s rồi mới nhả dữ liệu
 export const fetchMockAssignments = (): Promise<ApiResponse<Assignment[]>> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -63,6 +63,6 @@ export const fetchMockAssignments = (): Promise<ApiResponse<Assignment[]>> => {
         message: 'Lấy dữ liệu thành công',
         data: MOCK_ASSIGNMENTS,
       });
-    }, 5000); // Bắt đợi 5s để kịp nhìn thấy chữ "Đang tải..."
+    }, 3000); // Bắt đợi 3s để kịp nhìn thấy chữ "Đang tải..."
   });
 };
